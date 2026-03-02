@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ezekiel Whatley | Cybersecurity Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CSS VARIABLES & RESET
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --black: #050508;
+  --dark: #0a0a10;
+  --darker: #07070c;
+  --green: #00ff41;
+  --green-dim: #00cc33;
+  --green-glow: rgba(0, 255, 65, 0.15);
+  --cyan: #00d4ff;
+  --cyan-dim: #0099bb;
+  --cyan-glow: rgba(0, 212, 255, 0.12);
+  --red: #ff0040;
+  --amber: #ffb800;
+  --white: #e0e0e0;
+  --gray: #888;
+  --gray-dark: #333;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  cursor: default;
+}
+
+::selection {
+  background: var(--green);
+  color: var(--black);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark); }
+::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MATRIX RAIN CANVAS
+   ═══════════════════════════════════════════════════════════════ */
+#matrix-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCANLINE OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+.scanlines {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 9998;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NOISE GRAIN OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+.noise-overlay {
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: noiseMove 0.5s steps(8) infinite;
+}
+
+@keyframes noiseMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-10%, -10%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN SITE WRAPPER
+   ═══════════════════════════════════════════════════════════════ */
+#site-wrapper {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+#site-wrapper.hidden {
+  opacity: 0;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOOT SEQUENCE SCREEN
+   ═══════════════════════════════════════════════════════════════ */
+#boot-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--black);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  color: var(--green);
+  transition: opacity 0.8s ease;
+}
+
+#boot-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#boot-text {
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: 700px;
+  padding: 20px;
+  text-align: left;
+}
+
+#boot-text .line {
+  opacity: 0;
+  animation: bootLine 0.1s forwards;
+}
+
+@keyframes bootLine {
+  to { opacity: 1; }
+}
+
+.boot-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--green);
+  animation: blink 0.7s step-end infinite;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOP NAV BAR
+   ═══════════════════════════════════════════════════════════════ */
+.top-bar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 50px;
+  background: rgba(5, 5, 8, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.top-bar-left {
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-bar-left .dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px var(--green); }
+  50% { opacity: 0.4; box-shadow: 0 0 8px var(--green); }
+}
+
+.top-bar-center {
+  display: flex;
+  gap: 30px;
+}
+
+.top-bar-center a {
+  color: var(--gray);
+  text-decoration: none;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 11px;
+  transition: color 0.3s, text-shadow 0.3s;
+  position: relative;
+}
+
+.top-bar-center a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--green);
+  transition: width 0.3s;
+}
+
+.top-bar-center a:hover {
+  color: var(--green);
+  text-shadow: 0 0 10px var(--green-glow);
+}
+
+.top-bar-center a:hover::after { width: 100%; }
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.terminal-toggle-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  color: var(--green);
+  padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.terminal-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,255,65,0.1), transparent);
+  transition: left 0.5s;
+}
+
+.terminal-toggle-btn:hover::before { left: 100%; }
+
+.terminal-toggle-btn:hover {
+  background: rgba(0, 255, 65, 0.08);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.15), inset 0 0 20px rgba(0, 255, 65, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HERO SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 80px 40px 40px;
+}
+
+.hero-grid-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image:
+    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, black 20%, transparent 70%);
+}
+
+.hero-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Profile hex avatar */
+.hex-avatar {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 40px;
+  position: relative;
+}
+
+.hex-avatar-inner {
+  width: 140px;
+  height: 140px;
+  margin: 10px auto;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  background: linear-gradient(135deg, var(--green-dim), var(--cyan-dim));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hex-avatar-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hex-avatar-inner .initials {
+  font-family: var(--font-display);
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--black);
+  letter-spacing: 4px;
+}
+
+.hex-ring {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 160px;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border: 2px solid var(--green);
+  animation: hexSpin 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes hexSpin {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  opacity: 0;
+  animation: fadeSlideUp 0.8s 0.2s forwards;
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 6vw, 80px);
+  font-weight: 900;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  opacity: 0;
+  animation: fadeSlideUp 0.8s 0.4s forwards;
+  background: linear-gradient(135deg, var(--white) 0%, var(--green) 50%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--green-dim);
+  margin-bottom: 30px;
+  opacity: 0;
+  animation: fadeSlideUp 0.8s 0.6s forwards;
+}
+
+.typed-wrapper {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--gray);
+  min-height: 24px;
+  opacity: 0;
+  animation: fadeSlideUp 0.8s 0.8s forwards;
+}
+
+.typed-wrapper .prefix {
+  color: var(--green);
+}
+
+.typed-wrapper .typed-text {
+  color: var(--cyan);
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero stat badges */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.stat-badge {
+  background: rgba(0, 255, 65, 0.04);
+  border: 1px solid rgba(0, 255, 65, 0.12);
+  padding: 14px 24px;
+  text-align: center;
+  min-width: 140px;
+  opacity: 0;
+  animation: fadeSlideUp 0.6s forwards;
+  transition: all 0.3s;
+}
+
+.stat-badge:hover {
+  border-color: var(--green-dim);
+  background: rgba(0, 255, 65, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 255, 65, 0.08);
+}
+
+.stat-badge .stat-val {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--green);
+  display: block;
+}
+
+.stat-badge .stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gray);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.section {
+  padding: 100px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.section-header {
+  margin-bottom: 60px;
+  position: relative;
+}
+
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 42px);
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.section-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  margin-top: 15px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ABOUT SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.about-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: start;
+}
+
+.about-text {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+.about-text strong {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.about-info-grid {
+  display: grid;
+  gap: 1px;
+  background: rgba(0, 255, 65, 0.06);
+  border: 1px solid rgba(0, 255, 65, 0.1);
+}
+
+.about-info-item {
+  background: var(--dark);
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.about-info-item .label {
+  color: var(--gray);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.about-info-item .value {
+  color: var(--green);
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EXPERIENCE SECTION - TIMELINE
+   ═══════════════════════════════════════════════════════════════ */
+.timeline {
+  position: relative;
+  padding-left: 40px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--green), var(--cyan), transparent);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 50px;
+  padding: 30px;
+  background: rgba(10, 10, 16, 0.8);
+  border: 1px solid rgba(0, 255, 65, 0.08);
+  transition: all 0.4s;
+}
+
+.timeline-item:hover {
+  border-color: rgba(0, 255, 65, 0.25);
+  background: rgba(0, 255, 65, 0.02);
+  transform: translateX(5px);
+  box-shadow: -4px 0 30px rgba(0, 255, 65, 0.05);
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -47px;
+  top: 35px;
+  width: 12px;
+  height: 12px;
+  background: var(--green);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  box-shadow: 0 0 10px var(--green);
+}
+
+.timeline-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.timeline-role {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.timeline-company {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--green-dim);
+  margin-bottom: 15px;
+}
+
+.timeline-bullets {
+  list-style: none;
+}
+
+.timeline-bullets li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--gray);
+  font-weight: 300;
+}
+
+.timeline-bullets li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--green-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SKILLS SECTION - RADAR STYLE
+   ═══════════════════════════════════════════════════════════════ */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.skill-category {
+  background: rgba(10, 10, 16, 0.8);
+  border: 1px solid rgba(0, 255, 65, 0.08);
+  padding: 30px;
+  transition: all 0.4s;
+}
+
+.skill-category:hover {
+  border-color: rgba(0, 255, 65, 0.2);
+  box-shadow: 0 0 40px rgba(0, 255, 65, 0.04);
+}
+
+.skill-cat-header {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border: 1px solid rgba(0, 255, 65, 0.15);
+  color: var(--green-dim);
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  cursor: default;
+}
+
+.skill-tag:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(0, 255, 65, 0.06);
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.1);
+  transform: translateY(-2px);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACTIVITIES SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.activity-card {
+  background: rgba(10, 10, 16, 0.8);
+  border: 1px solid rgba(0, 212, 255, 0.08);
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+}
+
+.activity-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--cyan), var(--green));
+}
+
+.activity-card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 40px rgba(0, 212, 255, 0.06);
+}
+
+.activity-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.activity-role {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cyan);
+  margin-bottom: 4px;
+}
+
+.activity-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-dark);
+  margin-bottom: 12px;
+}
+
+.activity-desc {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CONTACT SECTION
+   ═══════════════════════════════════════════════════════════════ */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.contact-card {
+  background: rgba(10, 10, 16, 0.8);
+  border: 1px solid rgba(0, 255, 65, 0.08);
+  padding: 25px;
+  text-align: center;
+  transition: all 0.4s;
+  text-decoration: none;
+  display: block;
+}
+
+.contact-card:hover {
+  border-color: var(--green-dim);
+  background: rgba(0, 255, 65, 0.04);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 255, 65, 0.08);
+}
+
+.contact-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.contact-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.contact-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════════ */
+.footer {
+  text-align: center;
+  padding: 40px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gray-dark);
+  border-top: 1px solid rgba(0, 255, 65, 0.05);
+}
+
+.footer .green { color: var(--green-dim); }
+
+/* ═══════════════════════════════════════════════════════════════
+   TERMINAL OVERLAY
+   ═══════════════════════════════════════════════════════════════ */
+#terminal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  background: rgba(5, 5, 8, 0.97);
+  backdrop-filter: blur(30px);
+}
+
+#terminal-overlay.active {
+  display: flex;
+  animation: terminalOpen 0.4s ease-out;
+}
+
+@keyframes terminalOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(0, 255, 65, 0.05);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.terminal-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.terminal-bar-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-bar-dots span {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-bar-dots span:nth-child(1) { background: #ff5f57; }
+.terminal-bar-dots span:nth-child(2) { background: #ffbd2e; }
+.terminal-bar-dots span:nth-child(3) { background: #28c840; }
+
+.terminal-bar-title {
+  color: var(--gray);
+  letter-spacing: 1px;
+}
+
+.terminal-close-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid rgba(255, 0, 64, 0.3);
+  color: var(--red);
+  padding: 4px 12px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+
+.terminal-close-btn:hover {
+  background: rgba(255, 0, 64, 0.1);
+  border-color: var(--red);
+}
+
+#terminal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#terminal-body .output-line {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 2px;
+}
+
+#terminal-body .output-line.cmd { color: var(--white); }
+#terminal-body .output-line.info { color: var(--green); }
+#terminal-body .output-line.dir { color: var(--cyan); }
+#terminal-body .output-line.error { color: var(--red); }
+#terminal-body .output-line.accent { color: var(--amber); }
+#terminal-body .output-line.muted { color: var(--gray); }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(0, 255, 65, 0.03);
+  border-top: 1px solid rgba(0, 255, 65, 0.1);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}
+
+.terminal-prompt {
+  color: var(--green);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+#terminal-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  caret-color: var(--green);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .top-bar-center { display: none; }
+  .about-content { grid-template-columns: 1fr; }
+  .hero { padding: 80px 20px 40px; }
+  .section { padding: 60px 20px; }
+  .hero-stats { gap: 15px; }
+  .stat-badge { min-width: 100px; padding: 10px 16px; }
+  .timeline { padding-left: 25px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLL ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Glitch effect for name on hover */
+.hero-name:hover {
+  animation: glitch 0.3s ease;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-3px, 3px); }
+  40% { transform: translate(3px, -3px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(2px, 2px); }
+  100% { transform: translate(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ BOOT SEQUENCE ═══ -->
+<div id="boot-screen">
+  <div id="boot-text"></div>
+</div>
+
+<!-- ═══ MATRIX RAIN BACKGROUND ═══ -->
+<canvas id="matrix-bg"></canvas>
+
+<!-- ═══ OVERLAYS ═══ -->
+<div class="scanlines"></div>
+<div class="noise-overlay"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MAIN SITE
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="site-wrapper">
+
+  <!-- TOP BAR -->
+  <nav class="top-bar">
+    <div class="top-bar-left">
+      <span class="dot"></span>
+      <span>EW://SECURE</span>
+    </div>
+    <div class="top-bar-center">
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#activities">Activities</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="top-bar-right">
+      <button class="terminal-toggle-btn" onclick="openTerminal()">⌨ Terminal</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-content">
+      <div class="hex-avatar">
+        <div class="hex-avatar-inner">
+          <span class="initials">EW</span>
+        </div>
+        <div class="hex-ring"></div>
+      </div>
+      <div class="hero-tag">// Cybersecurity Engineer</div>
+      <h1 class="hero-name">Ezekiel Whatley</h1>
+      <p class="hero-subtitle">B.S. Cybersecurity Engineering · University of Delaware · Class of 2027</p>
+      <div class="typed-wrapper">
+        <span class="prefix">ezekiel@portfolio:~$ </span><span class="typed-text" id="typed-output"></span><span class="boot-cursor"></span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-badge" style="animation-delay: 1s">
+          <span class="stat-val">13+</span>
+          <span class="stat-label">Languages</span>
+        </div>
+        <div class="stat-badge" style="animation-delay: 1.2s">
+          <span class="stat-val">NASA</span>
+          <span class="stat-label">Researcher</span>
+        </div>
+        <div class="stat-badge" style="animation-delay: 1.4s">
+          <span class="stat-val">CTF</span>
+          <span class="stat-label">Competitor</span>
+        </div>
+        <div class="stat-badge" style="animation-delay: 1.6s">
+          <span class="stat-val">3+</span>
+          <span class="stat-label">Years Exp</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-header reveal">
+      <div class="section-label">// 01</div>
+      <h2 class="section-title">About Me</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="about-content reveal">
+      <div class="about-text">
+        Rising senior in <strong>Cybersecurity Engineering</strong> at the University of Delaware with strong Python skills and hands-on experience automating workflows using <strong>Bash and Docker</strong>. I've developed reproducible pipelines and custom tooling for logic locking and attack simulations in <strong>NASA-funded research</strong> and delivered metrics-driven documentation for lunar resource projects.<br><br>
+        I'm familiar with relational and NoSQL databases, unit testing frameworks, and cloud services. Currently seeking a <strong>DevOps Software Internship</strong> to build tools and APIs for performance metrics on IoT devices.
+      </div>
+      <div class="about-info-grid">
+        <div class="about-info-item">
+          <span class="label">Name</span>
+          <span class="value">Ezekiel Whatley</span>
+        </div>
+        <div class="about-info-item">
+          <span class="label">Location</span>
+          <span class="value">Camden, DE</span>
+        </div>
+        <div class="about-info-item">
+          <span class="label">University</span>
+          <span class="value">UDel · 2027</span>
+        </div>
+        <div class="about-info-item">
+          <span class="label">Major</span>
+          <span class="value">Cybersecurity Eng.</span>
+        </div>
+        <div class="about-info-item">
+          <span class="label">Honors</span>
+          <span class="value">Dean's List</span>
+        </div>
+        <div class="about-info-item">
+          <span class="label">Focus</span>
+          <span class="value">DevOps · IoT · Security</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section class="section" id="experience">
+    <div class="section-header reveal">
+      <div class="section-label">// 02</div>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <div class="timeline-date">Jan 2026 – Present</div>
+        <div class="timeline-role">Systems Engineering & Design Intern</div>
+        <div class="timeline-company">Cislune (Delaware Space Grant) · Remote</div>
+        <ul class="timeline-bullets">
+          <li>Supported a scoped engineering project in lunar resource and construction technology by developing Python-based tooling for tracking weekly performance metrics.</li>
+          <li>Contributed to NASA LunaRecycle Challenge Phase 2 by organizing and presenting submission materials.</li>
+          <li>Translated prototype and digital twin details into reviewer-friendly slides and short memos.</li>
+          <li>Created traceable documentation linking measurement points to model inputs, outputs, and verification notes.</li>
+          <li>Collaborated across Git-based workflows and leveraged Docker containers to improve reporting consistency.</li>
+        </ul>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-date">May 2025 – Present</div>
+        <div class="timeline-role">Lead Researcher</div>
+        <div class="timeline-company">NASA Research Internship · Newark, DE</div>
+        <ul class="timeline-bullets">
+          <li>Engineered original logic locking tools in Python and Go, and built a reproducible SAT/SLE attack pipeline to validate security claims.</li>
+          <li>Discovered new scaling laws for Diversification-Through Layering to improve resilience against attacks.</li>
+          <li>Authored first general SKGLock+ implementation; co-developing Trojan detection methods.</li>
+          <li>Prepared research manuscript for submission to ISCAS25 for academic review on Hardware Security.</li>
+        </ul>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-date">Nov 2024 – May 2025</div>
+        <div class="timeline-role">Undergraduate Researcher</div>
+        <div class="timeline-company">Logic Locking Modules Research · Newark, DE</div>
+        <ul class="timeline-bullets">
+          <li>Collaborated with Dr. Satwik to integrate Logic Locking Modules with OpenAI frameworks.</li>
+          <li>Developed hardware designs secured against AI-driven intrusions on IoT systems using System Verilog and Python.</li>
+        </ul>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-date">May 2023 – Present</div>
+        <div class="timeline-role">Lead Designer</div>
+        <div class="timeline-company">UD IT Website Project · Newark, DE</div>
+        <ul class="timeline-bullets">
+          <li>Spearheaded the redesign of the UD Parking Services website to meet ADA and HTML policy standards.</li>
+          <li>Implemented backend database integrations for real-time availability updates.</li>
+          <li>Managed project deadlines and board requirements for website aesthetics and functionality.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section" id="skills">
+    <div class="section-header reveal">
+      <div class="section-label">// 03</div>
+      <h2 class="section-title">Skills & Arsenal</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-category reveal">
+        <div class="skill-cat-header">Languages</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">C++</span>
+          <span class="skill-tag">C</span>
+          <span class="skill-tag">Java</span>
+          <span class="skill-tag">Go</span>
+          <span class="skill-tag">Bash</span>
+          <span class="skill-tag">HTML</span>
+          <span class="skill-tag">PHP</span>
+          <span class="skill-tag">System Verilog</span>
+          <span class="skill-tag">VHDL</span>
+          <span class="skill-tag">Assembly</span>
+          <span class="skill-tag">LEGv8</span>
+          <span class="skill-tag">TCL</span>
+        </div>
+      </div>
+      <div class="skill-category reveal">
+        <div class="skill-cat-header">Security</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Pentesting</span>
+          <span class="skill-tag">Ethical Hacking</span>
+          <span class="skill-tag">Reverse Engineering</span>
+          <span class="skill-tag">Digital Forensics</span>
+          <span class="skill-tag">Cryptography</span>
+          <span class="skill-tag">PWN / x86 Exploitation</span>
+          <span class="skill-tag">System Hardening</span>
+          <span class="skill-tag">Cloud Security</span>
+          <span class="skill-tag">Website Security</span>
+        </div>
+      </div>
+      <div class="skill-category reveal">
+        <div class="skill-cat-header">DevOps & Engineering</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Docker</span>
+          <span class="skill-tag">Virtual Machines</span>
+          <span class="skill-tag">Automation</span>
+          <span class="skill-tag">APIs</span>
+          <span class="skill-tag">Databases</span>
+          <span class="skill-tag">IoT Systems</span>
+          <span class="skill-tag">Cloud Services</span>
+          <span class="skill-tag">Git</span>
+          <span class="skill-tag">Command Line</span>
+        </div>
+      </div>
+      <div class="skill-category reveal">
+        <div class="skill-cat-header">Professional</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Project Management</span>
+          <span class="skill-tag">Technical Communication</span>
+          <span class="skill-tag">Stakeholder Communication</span>
+          <span class="skill-tag">Systems Engineering</span>
+          <span class="skill-tag">V&V</span>
+          <span class="skill-tag">Documentation</span>
+          <span class="skill-tag">Data Visualization</span>
+          <span class="skill-tag">Reporting</span>
+        </div>
+      </div>
+      <div class="skill-category reveal">
+        <div class="skill-cat-header">Tools</div>
+        <div class="skill-tags">
+          <span class="skill-tag">FactSage</span>
+          <span class="skill-tag">Fusion 360</span>
+          <span class="skill-tag">Git</span>
+          <span class="skill-tag">Google Workspace</span>
+        </div>
+      </div>
+      <div class="skill-category reveal">
+        <div class="skill-cat-header">Coursework</div>
+        <div class="skill-tags">
+          <span class="skill-tag">Digital Forensics</span>
+          <span class="skill-tag">Data Structures</span>
+          <span class="skill-tag">Web App Security</span>
+          <span class="skill-tag">Algorithms</span>
+          <span class="skill-tag">Pentesting & RE</span>
+          <span class="skill-tag">System Hardening</span>
+          <span class="skill-tag">Computer Systems Eng.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACTIVITIES -->
+  <section class="section" id="activities">
+    <div class="section-header reveal">
+      <div class="section-label">// 04</div>
+      <h2 class="section-title">Activities</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="activities-grid">
+      <div class="activity-card reveal">
+        <div class="activity-name">Blue Hens CTF</div>
+        <div class="activity-role">Team Member</div>
+        <div class="activity-date">May 2023 – Present</div>
+        <div class="activity-desc">Collaborate weekly to solve live Capture The Flag challenges backed by major industry sponsors. Analyze and execute solutions for challenges involving ethical hacking, reverse engineering, and penetration testing.</div>
+      </div>
+      <div class="activity-card reveal">
+        <div class="activity-name">NSBE</div>
+        <div class="activity-role">General Member</div>
+        <div class="activity-date">Sep 2023 – Present</div>
+        <div class="activity-desc">Attended networking events with engineering companies including Deloitte, JP Morgan and Exelon to build professional connections in STEM fields.</div>
+      </div>
+      <div class="activity-card reveal">
+        <div class="activity-name">NAACP</div>
+        <div class="activity-role">Community Chair</div>
+        <div class="activity-date">Sep 2024 – May 2025</div>
+        <div class="activity-desc">Planned and set up various community events with schools in Delaware to help spread awareness about NAACP.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section" id="contact">
+    <div class="section-header reveal">
+      <div class="section-label">// 05</div>
+      <h2 class="section-title">Contact</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="contact-grid">
+      <a href="mailto:zekebold@udel.edu" class="contact-card reveal">
+        <span class="contact-icon">✉</span>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">zekebold@udel.edu</div>
+      </a>
+      <a href="tel:302-505-6822" class="contact-card reveal">
+        <span class="contact-icon">☎</span>
+        <div class="contact-label">Phone</div>
+        <div class="contact-value">302-505-6822</div>
+      </a>
+      <a href="https://linkedin.com/in/ezekielwhatley" target="_blank" class="contact-card reveal">
+        <span class="contact-icon">⬡</span>
+        <div class="contact-label">LinkedIn</div>
+        <div class="contact-value">linkedin.com/in/ezekielwhatley</div>
+      </a>
+      <div class="contact-card reveal">
+        <span class="contact-icon">⌖</span>
+        <div class="contact-label">Location</div>
+        <div class="contact-value">Camden, DE</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="green">©</span> 2026 Ezekiel Whatley · <span class="green">Designed with precision</span> · All systems operational
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TERMINAL OVERLAY
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="terminal-overlay">
+  <div class="terminal-bar">
+    <div class="terminal-bar-left">
+      <div class="terminal-bar-dots"><span></span><span></span><span></span></div>
+      <span class="terminal-bar-title">ezekiel@portfolio — bash</span>
+    </div>
+    <button class="terminal-close-btn" onclick="closeTerminal()">✕ EXIT</button>
+  </div>
+  <div id="terminal-body"></div>
+  <div class="terminal-input-row">
+    <span class="terminal-prompt" id="terminal-prompt-text">ezekiel@portfolio:~$ </span>
+    <input type="text" id="terminal-input" spellcheck="false" autocomplete="off" autofocus>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════ -->
+<script>
+// ──────────────────────────────────────────
+// BOOT SEQUENCE
+// ──────────────────────────────────────────
+const bootLines = [
+  'BIOS v3.7.1 ... OK',
+  'Initializing kernel modules ...',
+  'Loading cybersecurity protocols ... ██████████ 100%',
+  'Mounting /home/ezekiel ...',
+  'Establishing secure connection ... ENCRYPTED',
+  'Verifying credentials ... ACCESS GRANTED',
+  '',
+  '  ███████╗██╗    ██╗',
+  '  ██╔════╝██║    ██║',
+  '  █████╗  ██║ █╗ ██║',
+  '  ██╔══╝  ██║███╗██║',
+  '  ███████╗╚███╔███╔╝',
+  '  ╚══════╝ ╚══╝╚══╝ ',
+  '',
+  'Welcome, visitor. Portfolio loaded.',
+  'Type "help" in terminal mode for commands.',
+  ''
+];
+
+function runBootSequence() {
+  const container = document.getElementById('boot-text');
+  let i = 0;
+  function addLine() {
+    if (i < bootLines.length) {
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.textContent = bootLines[i];
+      div.style.animationDelay = (i * 0.08) + 's';
+      container.appendChild(div);
+      i++;
+      setTimeout(addLine, 80);
+    } else {
+      setTimeout(() => {
+        document.getElementById('boot-screen').classList.add('fade-out');
+        setTimeout(() => {
+          document.getElementById('boot-screen').style.display = 'none';
+        }, 800);
+      }, 600);
+    }
+  }
+  addLine();
+}
+
+window.addEventListener('load', runBootSequence);
+
+// ──────────────────────────────────────────
+// MATRIX RAIN
+// ──────────────────────────────────────────
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01';
+const fontSize = 14;
+let columns = Math.floor(canvas.width / fontSize);
+let drops = Array(columns).fill(1);
+
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(5, 5, 8, 0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = fontSize + 'px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const text = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
+    }
+    drops[i]++;
+  }
+}
+
+setInterval(drawMatrix, 50);
+
+window.addEventListener('resize', () => {
+  columns = Math.floor(canvas.width / fontSize);
+  drops = Array(columns).fill(1);
+});
+
+// ──────────────────────────────────────────
+// TYPED TEXT EFFECT
+// ──────────────────────────────────────────
+const phrases = [
+  'cat /etc/skills | grep "security"',
+  'nmap -sV portfolio.ezekiel.dev',
+  'echo "NASA Research Lead"',
+  'docker run --rm security-pipeline',
+  'python3 logic_locking_tool.py --validate',
+  'git push origin main --force-with-lease',
+  'ssh ezekiel@nasa-research-lab',
+];
+
+let phraseIndex = 0, charIndex = 0, deleting = false;
+const typedOutput = document.getElementById('typed-output');
+
+function typeLoop() {
+  const current = phrases[phraseIndex];
+  if (!deleting) {
+    typedOutput.textContent = current.substring(0, charIndex + 1);
+    charIndex++;
+    if (charIndex === current.length) {
+      setTimeout(() => { deleting = true; typeLoop(); }, 2200);
+      return;
+    }
+    setTimeout(typeLoop, 60 + Math.random() * 40);
+  } else {
+    typedOutput.textContent = current.substring(0, charIndex - 1);
+    charIndex--;
+    if (charIndex === 0) {
+      deleting = false;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      setTimeout(typeLoop, 400);
+      return;
+    }
+    setTimeout(typeLoop, 30);
+  }
+}
+
+setTimeout(typeLoop, 2500);
+
+// ──────────────────────────────────────────
+// SCROLL REVEAL
+// ──────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ──────────────────────────────────────────
+// TERMINAL MODE
+// ──────────────────────────────────────────
+let terminalOpen = false;
+let currentPath = '/home/ezekiel';
+let commandHistory = [];
+let historyIndex = -1;
+
+// Virtual filesystem
+const fs = {
+  '/home/ezekiel': {
+    type: 'dir',
+    children: ['about.txt', 'education/', 'experience/', 'skills/', 'activities/', 'contact.txt']
+  },
+  '/home/ezekiel/about.txt': {
+    type: 'file',
+    content: `╔══════════════════════════════════════════════════════╗
+║                   EZEKIEL WHATLEY                    ║
+║              Cybersecurity Engineer                   ║
+╚══════════════════════════════════════════════════════╝
+
+Rising senior in Cybersecurity Engineering at the University
+of Delaware. Strong Python skills with hands-on experience
+automating workflows using Bash and Docker.
+
+Developed reproducible pipelines and custom tooling for
+logic locking and attack simulations in NASA-funded research.
+
+Currently seeking a DevOps Software Internship to build
+tools and APIs for performance metrics on IoT devices.
+
+Location:   Camden, DE
+University: University of Delaware (Class of 2027)
+Honors:     Dean's List
+Focus:      DevOps · IoT Security · Hardware Security`
+  },
+  '/home/ezekiel/contact.txt': {
+    type: 'file',
+    content: `╔══════════════════════════════════════════╗
+║            CONTACT INFORMATION           ║
+╚══════════════════════════════════════════╝
+
+  Email:    zekebold@udel.edu
+  Phone:    302-505-6822
+  LinkedIn: linkedin.com/in/ezekielwhatley
+  Location: Camden, DE`
+  },
+  '/home/ezekiel/education/': {
+    type: 'dir',
+    children: ['udel.txt', 'coursework.txt']
+  },
+  '/home/ezekiel/education/udel.txt': {
+    type: 'file',
+    content: `University of Delaware
+Bachelor of Science, Cybersecurity Engineering
+Expected Graduation: May 2027 | Newark, DE
+
+Achievements: Dean's List (May – Present)`
+  },
+  '/home/ezekiel/education/coursework.txt': {
+    type: 'file',
+    content: `RELEVANT COURSEWORK
+═══════════════════
+• Digital Forensics
+• Data Structures
+• Web Application Security
+• Ethical Hacking
+• Intro to Cybersecurity
+• Intro to Algorithms
+• Pentesting and Reverse Engineering
+• System Hardening and Protection
+• Intro to Computer Systems Engineering`
+  },
+  '/home/ezekiel/experience/': {
+    type: 'dir',
+    children: ['cislune.txt', 'nasa_research.txt', 'undergrad_research.txt', 'ud_it.txt']
+  },
+  '/home/ezekiel/experience/cislune.txt': {
+    type: 'file',
+    content: `CISLUNE (DELAWARE SPACE GRANT)
+Systems Engineering & Design Intern | Jan 2026 – Present | Remote
+═══════════════════════════════════════════════════════════════════
+
+→ Developed Python-based tooling for tracking weekly performance
+  metrics in lunar resource and construction technology project.
+→ Contributed to NASA LunaRecycle Challenge Phase 2.
+→ Translated prototype and digital twin details into reviewer-
+  friendly slides and short memos.
+→ Created traceable documentation linking measurement points to
+  model inputs, outputs, and verification notes.
+→ Leveraged Docker containers and Git-based workflows.`
+  },
+  '/home/ezekiel/experience/nasa_research.txt': {
+    type: 'file',
+    content: `NASA RESEARCH INTERNSHIP
+Lead Researcher | May 2025 – Present | Newark, DE
+══════════════════════════════════════════════════
+
+→ Engineered original logic locking tools in Python and Go.
+→ Built reproducible SAT/SLE attack pipeline to validate
+  security claims.
+→ Discovered new scaling laws for Diversification-Through
+  Layering to improve resilience against attacks.
+→ Authored first general SKGLock+ implementation.
+→ Co-developing Trojan detection methods.
+→ Prepared research manuscript for ISCAS25.`
+  },
+  '/home/ezekiel/experience/undergrad_research.txt': {
+    type: 'file',
+    content: `UNDERGRADUATE RESEARCH - LOGIC LOCKING MODULES
+Undergrad Researcher | Nov 2024 – May 2025 | Newark, DE
+═══════════════════════════════════════════════════════════
+
+→ Collaborated with Dr. Satwik to integrate Logic Locking
+  Modules with OpenAI frameworks.
+→ Developed hardware designs secured against AI-driven
+  intrusions on IoT systems using System Verilog and Python.`
+  },
+  '/home/ezekiel/experience/ud_it.txt': {
+    type: 'file',
+    content: `UD IT WEBSITE PROJECT
+Lead Designer | May 2023 – Present | Newark, DE
+═════════════════════════════════════════════════
+
+→ Spearheaded redesign of UD Parking Services website.
+→ Met ADA and HTML policy standards.
+→ Implemented backend database integrations for real-time
+  availability updates.
+→ Managed project deadlines and board requirements.`
+  },
+  '/home/ezekiel/skills/': {
+    type: 'dir',
+    children: ['languages.txt', 'technical.txt', 'tools.txt']
+  },
+  '/home/ezekiel/skills/languages.txt': {
+    type: 'file',
+    content: `PROGRAMMING LANGUAGES
+═════════════════════
+Python ·········· ████████████████████ Expert
+C++ ············· ███████████████░░░░░ Advanced
+Go ·············· ██████████████░░░░░░ Advanced
+Bash ············ ████████████████████ Expert
+Java ············ ██████████████░░░░░░ Advanced
+C ··············· ██████████████░░░░░░ Advanced
+HTML ············ ████████████████████ Expert
+PHP ············· ██████████░░░░░░░░░░ Intermediate
+System Verilog ·· ████████████████░░░░ Advanced
+VHDL ············ ████████████░░░░░░░░ Intermediate
+Assembly ········ ██████████░░░░░░░░░░ Intermediate
+LEGv8 ··········· ██████████░░░░░░░░░░ Intermediate
+TCL ············· ████████░░░░░░░░░░░░ Intermediate`
+  },
+  '/home/ezekiel/skills/technical.txt': {
+    type: 'file',
+    content: `TECHNICAL SKILLS
+════════════════
+Security:      Pentesting, Ethical Hacking, Reverse Engineering,
+               Digital Forensics, Cryptography, PWN, x86 Exploitation,
+               System Hardening, Cloud Security, Website Security
+
+DevOps:        Docker, Virtual Machines, Automation, APIs, Databases,
+               IoT Systems, Cloud Services, Git
+
+Engineering:   Systems Engineering, V&V, Traceability,
+               Requirements Gathering, Deliverable Management
+
+Communication: Technical Writing, Stakeholder Reporting,
+               Cross-Functional Collaboration, Data Visualization`
+  },
+  '/home/ezekiel/skills/tools.txt': {
+    type: 'file',
+    content: `TOOLS & SOFTWARE
+════════════════
+• FactSage
+• Fusion 360
+• Git
+• Google Workspace (Docs, Slides, Sheets)
+• Docker
+• Virtual Machines (VMware, VirtualBox)`
+  },
+  '/home/ezekiel/activities/': {
+    type: 'dir',
+    children: ['ctf.txt', 'nsbe.txt', 'naacp.txt']
+  },
+  '/home/ezekiel/activities/ctf.txt': {
+    type: 'file',
+    content: `BLUE HENS CTF CYBERSECURITY TEAM
+Team Member | May 2023 – Present
+═════════════════════════════════
+
+Collaborate weekly to solve live Capture The Flag
+challenges backed by major industry sponsors.
+
+Focus areas:
+  → Ethical Hacking
+  → Reverse Engineering
+  → Penetration Testing`
+  },
+  '/home/ezekiel/activities/nsbe.txt': {
+    type: 'file',
+    content: `NSBE – National Society of Black Engineers
+General Member | Sep 2023 – Present
+═══════════════════════════════════════
+
+Attended networking events with engineering companies
+including Deloitte, JP Morgan, and Exelon to build
+professional connections in STEM fields.`
+  },
+  '/home/ezekiel/activities/naacp.txt': {
+    type: 'file',
+    content: `NAACP
+Community Chair | Sep 2024 – May 2025
+══════════════════════════════════════
+
+Planned and organized community events with schools
+in Delaware to help spread awareness about NAACP.`
+  }
+};
+
+function resolvePath(input) {
+  if (input.startsWith('/')) return input;
+  let base = currentPath;
+  const parts = input.split('/');
+  for (const part of parts) {
+    if (part === '..') {
+      const segs = base.split('/');
+      segs.pop();
+      base = segs.join('/') || '/home/ezekiel';
+    } else if (part === '.' || part === '') {
+      continue;
+    } else {
+      base = base + '/' + part;
+    }
+  }
+  return base;
+}
+
+function getNode(path) {
+  // Try exact path
+  if (fs[path]) return fs[path];
+  // Try with trailing slash
+  if (fs[path + '/']) return fs[path + '/'];
+  return null;
+}
+
+function addOutput(text, cls = 'info') {
+  const body = document.getElementById('terminal-body');
+  const div = document.createElement('div');
+  div.className = 'output-line ' + cls;
+  div.textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function addOutputHTML(html, cls = 'info') {
+  const body = document.getElementById('terminal-body');
+  const div = document.createElement('div');
+  div.className = 'output-line ' + cls;
+  div.innerHTML = html;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function processCommand(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return;
+
+  commandHistory.push(trimmed);
+  historyIndex = commandHistory.length;
+
+  // Echo the command
+  const promptStr = `ezekiel@portfolio:${currentPath.replace('/home/ezekiel', '~')}$ `;
+  addOutput(promptStr + trimmed, 'cmd');
+
+  const parts = trimmed.split(/\s+/);
+  const cmd = parts[0].toLowerCase();
+  const args = parts.slice(1);
+
+  switch (cmd) {
+    case 'help':
+      addOutput('', 'info');
+      addOutput('╔════════════════════════════════════════════════╗', 'accent');
+      addOutput('║        AVAILABLE COMMANDS                      ║', 'accent');
+      addOutput('╠════════════════════════════════════════════════╣', 'accent');
+      addOutput('║  ls [dir]        List directory contents       ║', 'accent');
+      addOutput('║  cd <dir>        Change directory              ║', 'accent');
+      addOutput('║  cat <file>      Read file contents            ║', 'accent');
+      addOutput('║  pwd             Print working directory       ║', 'accent');
+      addOutput('║  whoami          Display user identity         ║', 'accent');
+      addOutput('║  neofetch        System information            ║', 'accent');
+      addOutput('║  tree            Show directory tree           ║', 'accent');
+      addOutput('║  clear           Clear terminal                ║', 'accent');
+      addOutput('║  exit            Exit terminal mode            ║', 'accent');
+      addOutput('║  help            Show this help message        ║', 'accent');
+      addOutput('╚════════════════════════════════════════════════╝', 'accent');
+      addOutput('', 'info');
+      break;
+
+    case 'ls': {
+      const target = args[0] ? resolvePath(args[0]) : currentPath;
+      let node = getNode(target);
+      if (!node || node.type !== 'dir') {
+        addOutput(`ls: cannot access '${args[0] || target}': No such directory`, 'error');
+        break;
+      }
+      addOutput('', 'info');
+      node.children.forEach(c => {
+        const isDir = c.endsWith('/');
+        addOutput('  ' + c, isDir ? 'dir' : 'info');
+      });
+      addOutput('', 'info');
+      break;
+    }
+
+    case 'cd': {
+      if (!args[0] || args[0] === '~') {
+        currentPath = '/home/ezekiel';
+        updatePrompt();
+        break;
+      }
+      const target = resolvePath(args[0]);
+      let node = getNode(target);
+      if (!node || node.type !== 'dir') {
+        addOutput(`cd: no such directory: ${args[0]}`, 'error');
+        break;
+      }
+      currentPath = target.replace(/\/$/, '');
+      updatePrompt();
+      break;
+    }
+
+    case 'cat': {
+      if (!args[0]) {
+        addOutput('cat: missing operand', 'error');
+        break;
+      }
+      const target = resolvePath(args[0]);
+      const node = getNode(target);
+      if (!node || node.type !== 'file') {
+        addOutput(`cat: ${args[0]}: No such file`, 'error');
+        break;
+      }
+      addOutput('', 'info');
+      node.content.split('\n').forEach(line => addOutput(line, 'info'));
+      addOutput('', 'info');
+      break;
+    }
+
+    case 'pwd':
+      addOutput(currentPath, 'info');
+      break;
+
+    case 'whoami':
+      addOutput('', 'info');
+      addOutput('Ezekiel Whatley', 'accent');
+      addOutput('Cybersecurity Engineering Student | NASA Researcher', 'info');
+      addOutput('University of Delaware · Class of 2027', 'muted');
+      addOutput('', 'info');
+      break;
+
+    case 'neofetch':
+      addOutput('', 'info');
+      addOutput('       ▄▄▄▄▄▄▄▄▄▄▄       ezekiel@portfolio', 'dir');
+      addOutput('      ██████████████      ─────────────────────', 'dir');
+      addOutput('     ████▀▀▀▀▀▀████      OS:     Cybersecurity Engineering v4.0', 'dir');
+      addOutput('    ████        ████     Host:   University of Delaware', 'dir');
+      addOutput('   ████ ██████ ████     Kernel: Python · Go · Bash', 'dir');
+      addOutput('   ████ ██████ ████     Shell:  /bin/security', 'dir');
+      addOutput('    ████        ████     CPU:    NASA-Research × Logic-Locking', 'dir');
+      addOutput('     ████▄▄▄▄▄▄████      GPU:    CTF-Challenges × Pentesting', 'dir');
+      addOutput('      ██████████████      Memory: 13+ Languages Loaded', 'dir');
+      addOutput('       ▀▀▀▀▀▀▀▀▀▀▀       Uptime: 3+ years in security', 'dir');
+      addOutput('', 'info');
+      break;
+
+    case 'tree':
+      addOutput('', 'info');
+      addOutput('/home/ezekiel', 'dir');
+      addOutput('├── about.txt', 'info');
+      addOutput('├── contact.txt', 'info');
+      addOutput('├── education/', 'dir');
+      addOutput('│   ├── udel.txt', 'info');
+      addOutput('│   └── coursework.txt', 'info');
+      addOutput('├── experience/', 'dir');
+      addOutput('│   ├── cislune.txt', 'info');
+      addOutput('│   ├── nasa_research.txt', 'info');
+      addOutput('│   ├── undergrad_research.txt', 'info');
+      addOutput('│   └── ud_it.txt', 'info');
+      addOutput('├── skills/', 'dir');
+      addOutput('│   ├── languages.txt', 'info');
+      addOutput('│   ├── technical.txt', 'info');
+      addOutput('│   └── tools.txt', 'info');
+      addOutput('└── activities/', 'dir');
+      addOutput('    ├── ctf.txt', 'info');
+      addOutput('    ├── nsbe.txt', 'info');
+      addOutput('    └── naacp.txt', 'info');
+      addOutput('', 'info');
+      addOutput('4 directories, 13 files', 'muted');
+      addOutput('', 'info');
+      break;
+
+    case 'clear':
+      document.getElementById('terminal-body').innerHTML = '';
+      break;
+
+    case 'exit':
+      closeTerminal();
+      break;
+
+    case 'sudo':
+      addOutput('Nice try. 😏 Access level: visitor', 'error');
+      break;
+
+    case 'rm':
+      addOutput('Permission denied: You cannot delete Ezekiel\'s achievements.', 'error');
+      break;
+
+    case 'hack':
+      addOutput('Ironic, isn\'t it? The cybersecurity guy\'s site can\'t be hacked from within.', 'accent');
+      break;
+
+    case 'date':
+      addOutput(new Date().toString(), 'info');
+      break;
+
+    case 'echo':
+      addOutput(args.join(' '), 'info');
+      break;
+
+    case 'uname':
+      addOutput('EzekielOS 4.0.0-cybersec #1 SMP PREEMPT UDel x86_64 GNU/Linux', 'info');
+      break;
+
+    case 'ping':
+      addOutput('PING recruiter — 64 bytes: Hire Ezekiel!', 'accent');
+      break;
+
+    default:
+      addOutput(`command not found: ${cmd}. Type 'help' for available commands.`, 'error');
+  }
+}
+
+function updatePrompt() {
+  const display = currentPath.replace('/home/ezekiel', '~');
+  document.getElementById('terminal-prompt-text').textContent = `ezekiel@portfolio:${display}$ `;
+}
+
+function openTerminal() {
+  const overlay = document.getElementById('terminal-overlay');
+  const siteWrapper = document.getElementById('site-wrapper');
+  overlay.classList.add('active');
+  siteWrapper.classList.add('hidden');
+  terminalOpen = true;
+
+  const body = document.getElementById('terminal-body');
+  body.innerHTML = '';
+  addOutput('Welcome to Ezekiel Whatley\'s portfolio terminal.', 'accent');
+  addOutput('Type "help" if you need help.', 'muted');
+  addOutput('', 'info');
+
+  setTimeout(() => {
+    document.getElementById('terminal-input').focus();
+  }, 100);
+}
+
+function closeTerminal() {
+  const overlay = document.getElementById('terminal-overlay');
+  const siteWrapper = document.getElementById('site-wrapper');
+  overlay.classList.remove('active');
+  siteWrapper.classList.remove('hidden');
+  terminalOpen = false;
+  currentPath = '/home/ezekiel';
+  updatePrompt();
+}
+
+// Terminal input handling
+document.getElementById('terminal-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    processCommand(this.value);
+    this.value = '';
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex > 0) {
+      historyIndex--;
+      this.value = commandHistory[historyIndex];
+    }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      this.value = commandHistory[historyIndex];
+    } else {
+      historyIndex = commandHistory.length;
+      this.value = '';
+    }
+  }
+});
+
+// Global key listener
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && terminalOpen) {
+    closeTerminal();
+  }
+  // Focus terminal input when terminal is open
+  if (terminalOpen && e.key !== 'Escape') {
+    document.getElementById('terminal-input').focus();
+  }
+});
+
+// Click anywhere on terminal to focus input
+document.getElementById('terminal-overlay').addEventListener('click', function() {
+  document.getElementById('terminal-input').focus();
+});
+</script>
+</body>
+</html>
